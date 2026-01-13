@@ -1,10 +1,15 @@
+import os
 from pathlib import Path
 
+# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = 'replace-this-with-a-secure-key'
+# SECURITY: read secret key from environment in production
+# Use `DJANGO_SECRET_KEY` environment variable; fallback to placeholder for local dev
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'replace-this-with-a-secure-key')
 
-DEBUG = True
+# DEBUG can be controlled via environment variable for deployments
+DEBUG = os.environ.get('DJANGO_DEBUG', 'True') == 'True'
 
 ALLOWED_HOSTS = []
 

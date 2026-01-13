@@ -1,4 +1,19 @@
-# Python
+\.venv/
+venv/
+env/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+db.sqlite3
+.env
+/.venv
+*.log
+.DS_Store
+/.vscode/
+media/
+staticfiles/
+node_modules/# Python
 __pycache__/
 *.py[cod]
 *.so
