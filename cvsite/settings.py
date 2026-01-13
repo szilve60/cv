@@ -101,6 +101,16 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+# Ensure this Railway host is always allowed (temporary, for deployment debugging)
+try:
+    ALLOWED_HOSTS
+except NameError:
+    ALLOWED_HOSTS = []
+
+RAILWAY_FORCE_HOST = 'web-production-6fc203.up.railway.app'
+if RAILWAY_FORCE_HOST not in ALLOWED_HOSTS:
+    ALLOWED_HOSTS.append(RAILWAY_FORCE_HOST)
+
 import os
 from pathlib import Path
 
