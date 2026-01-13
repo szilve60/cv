@@ -18,7 +18,7 @@ raw_hosts = os.environ.get('DJANGO_ALLOWED_HOSTS', '')
 if raw_hosts:
     ALLOWED_HOSTS = [h.strip() for h in raw_hosts.split(',') if h.strip()]
 else:
-    ALLOWED_HOSTS = []
+    ALLOWED_HOSTS = ['web-production-6fc203.up.railway.app']
     rail_pub = (
         os.environ.get('RAILWAY_PUBLIC_DOMAIN')
         or os.environ.get('RAILWAY_PUBLIC_URL')
