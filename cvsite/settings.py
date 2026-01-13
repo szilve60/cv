@@ -11,25 +11,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Security
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'replace-this-with-a-secure-key')
-DEBUG = os.environ.get('DJANGO_DEBUG', 'False') == 'True'
 
-# ALLOWED_HOSTS: read comma-separated env var, fallback to Railway public domain if not set
-raw_hosts = os.environ.get('DJANGO_ALLOWED_HOSTS', '')
-if raw_hosts:
-    ALLOWED_HOSTS = [h.strip() for h in raw_hosts.split(',') if h.strip()]
-else:
     ALLOWED_HOSTS = ['web-production-6fc203.up.railway.app']
-    rail_pub = (
-        os.environ.get('RAILWAY_PUBLIC_DOMAIN')
-        or os.environ.get('RAILWAY_PUBLIC_URL')
-        or os.environ.get('RAILWAY_SERVICE_URL')
-        or os.environ.get('RAILWAY_PRIVATE_DOMAIN')
-    )
-    if rail_pub:
-        if '://' in rail_pub:
-            rail_pub = rail_pub.split('://', 1)[1]
-        rail_pub = rail_pub.split('/', 1)[0]
-        ALLOWED_HOSTS = [rail_pub]
+  
 
 # Installed apps and middleware
 INSTALLED_APPS = [
