@@ -1,0 +1,127 @@
+:root{
+	--bg:#303033;
+	--panel:#3b3b3d;
+	--accent:#f2b600;
+	--muted:#cfcfcf;
+}
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Poppins:wght@400;600;800&display=swap');
+
+/* Typography: headings use Poppins, body uses Inter to match the sample */
+/* Use a homogeneous grey background up to the yellow band */
+body{font-family: 'Inter', "Segoe UI", Roboto, Arial, sans-serif; background:var(--panel); color:var(--muted); margin:0}
+.cv-wrap{max-width:1000px;margin:24px auto;background:transparent;box-shadow:none;border-radius:0;overflow:visible}
+.cv-wrap.hero{min-height:100vh;display:flex;align-items:center}
+
+/* Top site header: left brand and centered CTAs */
+.site-header{position:relative;/* non-fixed: stays in normal document flow and will scroll away */display:flex;align-items:center;justify-content:center;padding:12px 20px;margin:0 0 8px;background:rgba(16,16,18,0.02);backdrop-filter:blur(4px)}
+.site-header .brand-btn{position:absolute;left:20px;color:var(--accent);font-family:'Poppins',sans-serif;font-weight:800;font-size:20px;text-decoration:none;padding:8px 10px;border-radius:6px;transition:transform .18s ease, color .18s ease}
+.site-header .brand-btn:hover{transform:scale(1.14)}
+.site-header .top-center-ctas{display:flex;gap:12px}
+.site-header .top-center-ctas .btn{padding:10px 18px}
+
+/* Make room for fixed header so it doesn't overlap hero */
+/* header is no longer fixed, no extra body padding needed */
+.cv-header{display:flex;gap:20px;padding:28px 36px;background:linear-gradient(rgba(0,0,0,0.35),rgba(0,0,0,0.35));align-items:center}
+/* Hero layout */
+.hero{display:flex;align-items:stretch;gap:0;overflow:hidden}
+.hero-left{flex:1;padding:44px 56px;background:transparent}
+.hero-right{width:48%;min-width:380px;position:relative;display:flex;align-items:center;justify-content:center}
+.hero-right img{width:360px;height:360px;object-fit:cover;border-radius:50%;display:block;box-shadow:0 12px 30px rgba(0,0,0,0.45);}
+
+/* smooth scrolling */
+html{scroll-behavior:smooth}
+
+/* About section cards under hero */
+.about-section{padding:36px 56px;background:linear-gradient(180deg, rgba(0,0,0,0.02), transparent);}
+.about-cards{display:flex;gap:20px;align-items:flex-start}
+.card{flex:1;background:rgba(0,0,0,0.12);padding:20px;border-radius:8px;box-shadow:inset 0 1px 0 rgba(255,255,255,0.02)}
+.card h3{color:var(--accent);margin:0 0 12px;padding-left:8px;border-left:4px solid var(--accent);padding-left:12px}
+.card ul{margin:0;padding-left:18px;color:var(--muted)}
+.skills-list{display:flex;flex-wrap:wrap;gap:10px;list-style:none;padding:0;margin:0}
+.skill-pill{background:rgba(242,182,0,0.12);color:var(--accent);padding:6px 10px;border-radius:6px}
+.about-section .desc{color:var(--muted);margin-top:6px}
+
+@media(max-width:1000px){
+	.about-cards{flex-direction:column}
+}
+
+/* Yellow full-width band under hero */
+.yellow-band{background:var(--accent);width:100%;display:block;opacity:0;transform:translateY(18px);pointer-events:none;transition:opacity .6s ease, transform .6s cubic-bezier(.2,.9,.3,1)}
+.yellow-band.visible{opacity:1;transform:none;pointer-events:auto}
+.yellow-inner{max-width:1000px;margin:0 auto;padding:28px 56px 56px}
+.separator{color:#111;font-weight:900;font-size:48px;margin:-8px 0 28px;padding:8px 12px;text-align:center;display:block}
+.about-section{background:transparent;padding:18px 0}
+.about-cards .card{background:var(--panel);color:var(--muted);box-shadow:0 6px 18px rgba(0,0,0,0.35)}
+
+/* Lazy reveal for about cards */
+.about-cards .card{opacity:0;transform:translateY(22px);transition:opacity .7s ease, transform .7s cubic-bezier(.2,.9,.3,1)}
+.about-cards .card.revealed{opacity:1;transform:none}
+
+@media(max-width:800px){
+	.yellow-inner{padding:18px}
+	.separator{font-size:20px;margin:-12px 0 12px}
+}
+
+/* Experience full-width band styling */
+.exp-band{width:100%;display:block;margin:0 0 18px}
+.exp-inner{max-width:1000px;margin:0 auto;padding:0 56px}
+.exp-band .exp-card-top{border-radius:8px;padding:22px;background:var(--panel);box-shadow:0 10px 30px rgba(0,0,0,0.45);position:relative;z-index:5}
+.exp-band .exp-card-top h3{color:var(--accent);margin-top:0}
+
+@media(max-width:800px){
+	.exp-inner{padding:0 18px}
+}
+
+/* Programming skills bar visuals */
+.card-programming .prog-list{list-style:none;margin:0;padding:0}
+.card-programming .prog-row{display:flex;align-items:center;gap:12px;margin:10px 0}
+.card-programming .lang{flex:0 0 140px;color:var(--muted)}
+.card-programming .prog-bar{flex:1;height:12px;background:rgba(255,255,255,0.06);border-radius:8px;overflow:hidden}
+.card-programming .prog-bar .fill{height:100%;background:linear-gradient(90deg,var(--accent),#e6b600);border-radius:8px;width:0;transition:width 900ms cubic-bezier(.2,.9,.3,1)}
+
+.hero-name{color:var(--accent);font-size:56px;margin:0 0 8px;font-weight:800;letter-spacing:-0.5px;font-family:'Poppins',sans-serif}
+.hero-role{color:#fff;margin:0 0 18px;font-size:20px;font-weight:600}
+.hero-summary p{color:var(--muted);line-height:1.6;margin:10px 0;font-size:16px}
+.hero-cta{margin:18px 0;display:flex;gap:12px}
+.btn{padding:12px 22px;border-radius:8px;text-decoration:none;font-weight:700;font-family:'Poppins',sans-serif;font-size:16px}
+.btn.primary{background:var(--accent);color:#111}
+.btn.outline{border:2px solid var(--accent);color:var(--accent);background:transparent}
+.social{color:var(--accent);display:inline-block;margin-right:12px;text-decoration:underline}
+.header-left{width:170px;display:flex;align-items:center;justify-content:center}
+.profile-pic{width:150px;height:150px;object-fit:cover;border-radius:50%;border:0;box-shadow:0 6px 18px rgba(0,0,0,0.45);transform:translateY(0);background:transparent}
+.profile-pic::before{content:""}
+.header-right{flex:1}
+.name{color:var(--accent);font-size:36px;margin:0 0 6px}
+.title{color:#fff;margin:0 0 10px;font-size:18px}
+.contacts{color:var(--muted);font-size:14px}
+.contact-line{margin:4px 0}
+
+.cv-body{display:flex;gap:24px;padding:26px 36px;background:var(--panel)}
+.col{flex:1}
+.col.left{max-width:46%}
+.col.right{flex:1}
+.section{margin-bottom:18px}
+.section h3{background:var(--panel);color:var(--accent);padding:8px 10px;margin:0 0 12px;font-size:18px;border-left:6px solid var(--accent)}
+.edu-item,.exp-item{margin-bottom:10px}
+.dates{color:#bdbdbd;font-size:90%;margin-left:6px}
+.desc{color:var(--muted);margin-top:4px}
+.skills{list-style:none;padding:0;display:flex;gap:8px;flex-wrap:wrap}
+.skill{background:rgba(242,182,0,0.12);color:var(--accent);padding:6px 10px;border-radius:4px}
+
+@media(max-width:800px){
+		.cv-header{flex-direction:row}
+		.cv-body{flex-direction:column}
+		.col.left{max-width:none}
+		.profile-pic{width:110px;height:110px;border-width:4px}
+		.hero-right{display:none}
+
+		/* Responsive typography */
+		.hero-name{font-size:32px}
+		.hero-role{font-size:16px}
+		.hero-summary p{font-size:14px}
+		.btn{font-size:14px;padding:10px 14px}
+		/* Header adjustments for small screens */
+		.site-header{height:auto;padding:10px 12px}
+		.site-header .brand-btn{font-size:18px;left:12px}
+}
+
