@@ -108,8 +108,19 @@ except NameError:
     ALLOWED_HOSTS = []
 
 RAILWAY_FORCE_HOST = 'web-production-6fc203.up.railway.app'
-if RAILWAY_FORCE_HOST not in ALLOWED_HOSTS:
-    ALLOWED_HOSTS.append(RAILWAY_FORCE_HOST)
+if RAILWAY_FORCE_HOST in ALLOWED_HOSTS:
+    # move it to first position
+    try:
+        ALLOWED_HOSTS.remove(RAILWAY_FORCE_HOST)
+    except ValueError:
+        pass
+    ALLOWED_HOSTS.insert(0, RAILWAY_FORCE_HOST)
+else:
+    # ensure it's the first/only host
+    ALLOWED_HOSTS.insert(0, RAILWAY_FORCE_HOST)
+
+# Final sanity: make sure ALLOWED_HOSTS is a list of strings
+ALLOWED_HOSTS = [str(h) for h in ALLOWED_HOSTS]
 
 import os
 from pathlib import Path
