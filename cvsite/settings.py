@@ -264,7 +264,7 @@ SECRET_KEY = 'replace-this-with-a-secure-key'
 
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['web-production-6fc203.up.railway.app']
 
 INSTALLED_APPS = [
     'django.contrib.admin',
