@@ -14,6 +14,17 @@ DEBUG = os.environ.get('DJANGO_DEBUG', 'True') == 'True'
 # Allowed hosts can be provided as comma-separated list
 ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS', '').split(',') if os.environ.get('DJANGO_ALLOWED_HOSTS') else []
 
+# If running on Railway, prefer Railway-provided public domain when ALLOWED_HOSTS is empty
+if not ALLOWED_HOSTS:
+    rail_pub = os.environ.get('RAILWAY_PUBLIC_DOMAIN') or os.environ.get('RAILWAY_PUBLIC_URL') or os.environ.get('RAILWAY_SERVICE_URL') or os.environ.get('RAILWAY_PRIVATE_DOMAIN')
+    if rail_pub:
+        # strip protocol if present
+        if '://' in rail_pub:
+            rail_pub = rail_pub.split('://', 1)[1]
+        # strip path if present
+        rail_pub = rail_pub.split('/', 1)[0]
+        ALLOWED_HOSTS = [rail_pub]
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
