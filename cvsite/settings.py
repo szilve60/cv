@@ -40,6 +40,12 @@ if RAILWAY_FORCE_HOST:
 
 ALLOWED_HOSTS = [str(h) for h in ALLOWED_HOSTS]
 
+# During local development, ensure localhost addresses are allowed when DEBUG is True
+if DEBUG:
+    for _h in ("127.0.0.1", "localhost", "[::1]"):
+        if _h not in ALLOWED_HOSTS:
+            ALLOWED_HOSTS.append(_h)
+
 # Applications
 INSTALLED_APPS = [
     'django.contrib.admin',
