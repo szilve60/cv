@@ -1,3 +1,4 @@
+
 import os
 from pathlib import Path
 
@@ -5,159 +6,53 @@ try:
     import dj_database_url
 except Exception:
     dj_database_url = None
-import os
-from pathlib import Path
-
-try:
-    import dj_database_url
-except Exception:
-    dj_database_url = None
-
-# --- Canonical settings.py (clean, env-driven) ---
 
 # Base directory
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Security
+# SECURITY
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'replace-this-with-a-secure-key')
 DEBUG = os.environ.get('DJANGO_DEBUG', 'False') == 'True'
 
-# ALLOWED_HOSTS: read from env or detect Railway public domain; optional override
+# ALLOWED_HOSTS: read from env or Railway fallback
 raw_hosts = os.environ.get('DJANGO_ALLOWED_HOSTS', '')
 if raw_hosts:
     ALLOWED_HOSTS = [h.strip() for h in raw_hosts.split(',') if h.strip()]
 else:
-    rail_pub = (
+    ALLOWED_HOSTS = []
+    rail = (
         os.environ.get('RAILWAY_PUBLIC_DOMAIN')
         or os.environ.get('RAILWAY_PUBLIC_URL')
         or os.environ.get('RAILWAY_SERVICE_URL')
-        or os.environ.get('RAILWAY_PRIVATE_DOMAIN')
     )
-    if rail_pub:
-        if '://' in rail_pub:
-            rail_pub = rail_pub.split('://', 1)[1]
-        rail_pub = rail_pub.split('/', 1)[0]
-        ALLOWED_HOSTS = [rail_pub]
-    else:
-        ALLOWED_HOSTS = []
+    if rail:
+        if '://' in rail:
+            rail = rail.split('://', 1)[1]
+        rail = rail.split('/', 1)[0]
+        ALLOWED_HOSTS.append(rail)
 
-# Force a Railway host first if needed (set via env to override)
+# Force a default Railway host first (can be overridden via RAILWAY_FORCE_HOST env)
 RAILWAY_FORCE_HOST = os.environ.get('RAILWAY_FORCE_HOST', 'web-production-6fc203.up.railway.app')
 if RAILWAY_FORCE_HOST:
     if RAILWAY_FORCE_HOST in ALLOWED_HOSTS:
         ALLOWED_HOSTS.remove(RAILWAY_FORCE_HOST)
-    import os
-    from pathlib import Path
+    ALLOWED_HOSTS.insert(0, RAILWAY_FORCE_HOST)
 
-    try:
-        import dj_database_url
-    except Exception:
-        dj_database_url = None
+ALLOWED_HOSTS = [str(h) for h in ALLOWED_HOSTS]
 
-    # Canonical env-driven settings
-    BASE_DIR = Path(__file__).resolve().parent.parent
+# Applications
+INSTALLED_APPS = [
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+    'resume',
+]
 
-    SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'replace-this-with-a-secure-key')
-    DEBUG = os.environ.get('DJANGO_DEBUG', 'False') == 'True'
-
-    # ALLOWED_HOSTS
-    raw = os.environ.get('DJANGO_ALLOWED_HOSTS', '')
-    if raw:
-        ALLOWED_HOSTS = [h.strip() for h in raw.split(',') if h.strip()]
-    else:
-        ALLOWED_HOSTS = []
-        rail = (
-            os.environ.get('RAILWAY_PUBLIC_DOMAIN')
-            or os.environ.get('RAILWAY_PUBLIC_URL')
-            or os.environ.get('RAILWAY_SERVICE_URL')
-            or os.environ.get('RAILWAY_PRIVATE_DOMAIN')
-        )
-        if rail:
-            if '://' in rail:
-                rail = rail.split('://', 1)[1]
-            rail = rail.split('/', 1)[0]
-            ALLOWED_HOSTS.append(rail)
-
-    # Optional override to force a Railway host first
-    RAILWAY_FORCE_HOST = os.environ.get('RAILWAY_FORCE_HOST', 'web-production-6fc203.up.railway.app')
-    if RAILWAY_FORCE_HOST:
-        if RAILWAY_FORCE_HOST in ALLOWED_HOSTS:
-            ALLOWED_HOSTS.remove(RAILWAY_FORCE_HOST)
-        ALLOWED_HOSTS.insert(0, RAILWAY_FORCE_HOST)
-
-    ALLOWED_HOSTS = [str(h) for h in ALLOWED_HOSTS]
-
-    # Apps
-    INSTALLED_APPS = [
-        'django.contrib.admin',
-        'django.contrib.auth',
-        'django.contrib.contenttypes',
-        'django.contrib.sessions',
-        'django.contrib.messages',
-        'django.contrib.staticfiles',
-        'resume',
-    ]
-
-    # Middleware
-    MIDDLEWARE = [
-        'django.middleware.security.SecurityMiddleware',
-        'whitenoise.middleware.WhiteNoiseMiddleware',
-        'django.contrib.sessions.middleware.SessionMiddleware',
-        'django.middleware.common.CommonMiddleware',
-        'django.middleware.csrf.CsrfViewMiddleware',
-        'django.contrib.auth.middleware.AuthenticationMiddleware',
-        'django.contrib.messages.middleware.MessageMiddleware',
-        'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    ]
-
-    ROOT_URLCONF = 'cvsite.urls'
-
-    TEMPLATES = [
-        {
-            'BACKEND': 'django.template.backends.django.DjangoTemplates',
-            'DIRS': [BASE_DIR / 'templates'],
-            'APP_DIRS': True,
-            'OPTIONS': {
-                'context_processors': [
-                    'django.template.context_processors.debug',
-                    'django.template.context_processors.request',
-                    'django.contrib.auth.context_processors.auth',
-                    'django.contrib.messages.context_processors.messages',
-                    'resume.context_processors.cv_lang',
-                ],
-            },
-        },
-    ]
-
-    WSGI_APPLICATION = 'cvsite.wsgi.application'
-
-    # Database: prefer DATABASE_URL when dj_database_url available
-    if os.environ.get('DATABASE_URL') and dj_database_url:
-        DATABASES = {
-            'default': dj_database_url.parse(os.environ.get('DATABASE_URL'), conn_max_age=600),
-        }
-    else:
-        DATABASES = {
-            'default': {
-                'ENGINE': 'django.db.backends.sqlite3',
-                'NAME': BASE_DIR / 'db.sqlite3',
-            }
-        }
-
-    AUTH_PASSWORD_VALIDATORS = []
-
-    LANGUAGE_CODE = 'en-us'
-    TIME_ZONE = 'UTC'
-    USE_I18N = True
-    USE_TZ = True
-
-    # Static files
-    STATIC_URL = '/static/'
-    STATICFILES_DIRS = [BASE_DIR / 'static']
-    STATIC_ROOT = BASE_DIR / 'staticfiles'
-    STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
-
-    DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+# Middleware (WhiteNoise after SecurityMiddleware)
+MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -166,7 +61,7 @@ if RAILWAY_FORCE_HOST:
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-
+]
 
 ROOT_URLCONF = 'cvsite.urls'
 
@@ -189,319 +84,36 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'cvsite.wsgi.application'
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+# Database: prefer DATABASE_URL (Postgres) when available
+if os.environ.get('DATABASE_URL') and dj_database_url:
+    DATABASES = {
+        'default': dj_database_url.parse(os.environ.get('DATABASE_URL'), conn_max_age=600),
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 AUTH_PASSWORD_VALIDATORS = []
 
 LANGUAGE_CODE = 'en-us'
-
 TIME_ZONE = 'UTC'
-
 USE_I18N = True
-
 USE_TZ = True
 
+# Static files / WhiteNoise
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
 
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-import os
-from pathlib import Path
-
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
-
-# SECURITY: read secret key from environment in production
-# Use `DJANGO_SECRET_KEY` environment variable; fallback to placeholder for local dev
-SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'replace-this-with-a-secure-key')
-
-# DEBUG can be controlled via environment variable for deployments
-DEBUG = os.environ.get('DJANGO_DEBUG', 'True') == 'True'
-
-ALLOWED_HOSTS = []
-
-INSTALLED_APPS = [
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'resume',
-]
-
-MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
-]
-
-ROOT_URLCONF = 'cvsite.urls'
-
-TEMPLATES = [
-    {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.debug',
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
-                'resume.context_processors.cv_lang',
-            ],
-        },
-    },
-]
-
-WSGI_APPLICATION = 'cvsite.wsgi.application'
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
-
-AUTH_PASSWORD_VALIDATORS = []
-
-LANGUAGE_CODE = 'en-us'
-
-TIME_ZONE = 'UTC'
-
-USE_I18N = True
-
-USE_TZ = True
-
-STATIC_URL = '/static/'
-STATICFILES_DIRS = [BASE_DIR / 'static']
-
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-from pathlib import Path
-
-BASE_DIR = Path(__file__).resolve().parent.parent
-
-SECRET_KEY = 'replace-this-with-a-secure-key'
-
-DEBUG = True
-
-ALLOWED_HOSTS = ['web-production-6fc203.up.railway.app']
-
-INSTALLED_APPS = [
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'resume',
-]
-
-MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
-]
-
-ROOT_URLCONF = 'cvsite.urls'
-
-TEMPLATES = [
-    {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.debug',
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
-            ],
-        },
-    },
-]
-
-WSGI_APPLICATION = 'cvsite.wsgi.application'
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
-
-AUTH_PASSWORD_VALIDATORS = []
-
-LANGUAGE_CODE = 'en-us'
-
-TIME_ZONE = 'UTC'
-
-USE_I18N = True
-
-USE_TZ = True
-
-STATIC_URL = '/static/'
-STATICFILES_DIRS = [BASE_DIR / 'static']
-
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-from pathlib import Path
-import os
-
-BASE_DIR = Path(__file__).resolve().parent.parent
-
-SECRET_KEY = 'replace-this-with-a-secure-key'
-
-DEBUG = True
-
-ALLOWED_HOSTS = []
-
-INSTALLED_APPS = [
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'resume',
-]
-
-MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
-]
-
-ROOT_URLCONF = 'cvsite.urls'
-
-TEMPLATES = [
-    {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.debug',
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
-            ],
-        },
-    },
-]
-
-WSGI_APPLICATION = 'cvsite.wsgi.application'
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
-
-AUTH_PASSWORD_VALIDATORS = []
-
-LANGUAGE_CODE = 'en-us'
-
-TIME_ZONE = 'UTC'
-
-USE_I18N = True
-
-USE_TZ = True
-
-STATIC_URL = '/static/'
-STATICFILES_DIRS = [BASE_DIR / 'static']
-
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-from pathlib import Path
-import os
-
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
-
-SECRET_KEY = 'replace-this-with-a-secure-key'
-
-DEBUG = True
-
-ALLOWED_HOSTS = ['web-production-6fc203.up.railway.app']
-
-INSTALLED_APPS = [
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'resume',
-]
-
-MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
-]
-
-ROOT_URLCONF = 'cvsite.urls'
-
-TEMPLATES = [
-    {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.debug',
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
-            ],
-        },
-    },
-]
-
-WSGI_APPLICATION = 'cvsite.wsgi.application'
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
-
-AUTH_PASSWORD_VALIDATORS = []
-
-LANGUAGE_CODE = 'en-us'
-
-TIME_ZONE = 'UTC'
-
-USE_I18N = True
-
-USE_TZ = True
-
-STATIC_URL = '/static/'
-STATICFILES_DIRS = [BASE_DIR / 'static']
+# CSRF trusted origins for HTTPS (useful in Django 6+)
+CSRF_TRUSTED_ORIGINS = []
+for h in ALLOWED_HOSTS:
+    if h and not h.startswith('127.') and not h.startswith('localhost') and ':' not in h:
+        CSRF_TRUSTED_ORIGINS.append(f"https://{h}")
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
