@@ -5,19 +5,29 @@ try:
     import dj_database_url
 except Exception:
     dj_database_url = None
+import os
+from pathlib import Path
 
-# Base dir
+try:
+    import dj_database_url
+except Exception:
+    dj_database_url = None
+
+# Base directory
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Security
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'replace-this-with-a-secure-key')
+DEBUG = os.environ.get('DJANGO_DEBUG', 'False') == 'True'
 
-# ALLOWED_HOSTS: read comma-separated env var, fallback to Railway public domain if not set
+# ALLOWED_HOSTS
+# 1) read comma-separated env var `DJANGO_ALLOWED_HOSTS`
+# 2) if empty, try Railway public domain envs
+# 3) then ensure forced Railway host is first (for debugging/compat)
 raw_hosts = os.environ.get('DJANGO_ALLOWED_HOSTS', '')
 if raw_hosts:
     ALLOWED_HOSTS = [h.strip() for h in raw_hosts.split(',') if h.strip()]
 else:
-    ALLOWED_HOSTS = ['web-production-6fc203.up.railway.app']
     rail_pub = (
         os.environ.get('RAILWAY_PUBLIC_DOMAIN')
         or os.environ.get('RAILWAY_PUBLIC_URL')
@@ -29,10 +39,20 @@ else:
             rail_pub = rail_pub.split('://', 1)[1]
         rail_pub = rail_pub.split('/', 1)[0]
         ALLOWED_HOSTS = [rail_pub]
+    else:
+        ALLOWED_HOSTS = []
 
-  
+# Force this Railway host first (can be removed later)
+RAILWAY_FORCE_HOST = os.environ.get('RAILWAY_FORCE_HOST', 'web-production-6fc203.up.railway.app')
+if RAILWAY_FORCE_HOST:
+    if RAILWAY_FORCE_HOST in ALLOWED_HOSTS:
+        ALLOWED_HOSTS.remove(RAILWAY_FORCE_HOST)
+    ALLOWED_HOSTS.insert(0, RAILWAY_FORCE_HOST)
 
-# Installed apps and middleware
+# Ensure list of strings
+ALLOWED_HOSTS = [str(h) for h in ALLOWED_HOSTS]
+
+# Applications and middleware
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -75,7 +95,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'cvsite.wsgi.application'
 
-# Database: prefer DATABASE_URL when dj_database_url is available
+# Database: prefer DATABASE_URL (Postgres) when dj_database_url available
 if os.environ.get('DATABASE_URL') and dj_database_url:
     DATABASES = {
         'default': dj_database_url.parse(os.environ.get('DATABASE_URL'), conn_max_age=600),
@@ -95,17 +115,13 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 
+# Static files (WhiteNoise)
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-# Ensure this Railway host is always allowed (temporary, for deployment debugging)
-try:
-    ALLOWED_HOSTS
-except NameError:
-    ALLOWED_HOSTS = []
 
 RAILWAY_FORCE_HOST = 'web-production-6fc203.up.railway.app'
 if RAILWAY_FORCE_HOST in ALLOWED_HOSTS:
