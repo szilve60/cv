@@ -1,4 +1,6 @@
+echo "Running database migrations..."
 #!/usr/bin/env sh
+# Entrypoint for Railway (ensure this file is executable on Unix hosts)
 set -e
 echo "Running database migrations..."
 python manage.py migrate --noinput
